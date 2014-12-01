@@ -23,6 +23,7 @@ package com.redhat.gss.tfonteyn.ldaptest;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Date;
 import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -56,6 +57,10 @@ public class LdapTest
     private String referral = null;
     private final SearchControls searchControls = new SearchControls();
     private String[] attributes;
+
+    private long startTime;
+    private long interimTime;
+    private long totalTime;
 
     public LdapTest()
     {
@@ -130,9 +135,20 @@ public class LdapTest
         return (url != null && basedn != null && filter != null);
     }
 
+    private void showTime(String msg)
+    {
+        interimTime = ((new Date()).getTime() - startTime);
+        System.out.println(msg + " took " + interimTime +  " ms");
+        totalTime += interimTime;
+    }
+
     public void exec(PrintStream out) throws IOException, NamingException
     {
+        startTime = (new Date()).getTime();
+
+        System.out.println("Binding...");
         LdapContext ctx = this.getLdapContext(out, url, binddn, bindCredentials);
+        showTime("Binding");
 
         searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
@@ -142,6 +158,7 @@ public class LdapTest
         }
 
         NamingEnumeration<SearchResult> results = null;
+        System.out.println("Searching...");
         try
         {
             results = ctx.search(basedn, filter, searchControls);
@@ -150,6 +167,8 @@ public class LdapTest
         {
             e.printStackTrace(out);
         }
+        showTime("Searching");
+
         if (results == null)
         {
             out.println("search returned 'null'");
@@ -177,7 +196,9 @@ public class LdapTest
             out.println("---------------------------------------------");
             if (userPassword != null)
             {
+                System.out.println("Authenticating...");
                 out.println("authentication " + (authUser(out, result,dn,userPassword) ? "successful" : "failed"));
+                showTime("Authenticating");
             }
         }
         if (!found)
@@ -185,6 +206,8 @@ public class LdapTest
             out.println("No results found");
         }
         close(ctx);
+
+        System.out.println("Total time taken: " + totalTime + " ms");
     }
 
     private boolean authUser(PrintStream out, SearchResult result, String user, String userpassword) throws IOException, NamingException
