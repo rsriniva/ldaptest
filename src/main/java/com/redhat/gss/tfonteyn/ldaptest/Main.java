@@ -30,7 +30,7 @@ import javax.naming.NamingException;
  */
 public class Main
 {
-    private static final String VERSION = "2014-09-18";
+    private static final String VERSION = "2014-12-01";
 
     /**
      * @param args the command line arguments
@@ -53,7 +53,7 @@ public class Main
 
     private static void usage()
     {
-        System.out.println("A simple LDAP connection checker - by Tom Fonteyne - version:" + VERSION);
+        System.out.println("\nA simple LDAP connection checker - by Tom Fonteyne - version:" + VERSION);
         System.out.println("Usage:");
         System.out.println(
             " java -jar ldaptest.jar -u <url> -b <baseDN> -f <filter> [-a attr1[,attr2]] [-D binddn -w password] [-rf|-ri|-rt] [-t [-n]]"
@@ -142,6 +142,7 @@ public class Main
             }
             else
             {
+                System.out.println("Unknown argument: " + args[i]);
                 usage();
             }
         }
